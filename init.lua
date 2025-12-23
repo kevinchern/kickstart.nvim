@@ -107,7 +107,7 @@ vim.o.wrap = false
 -- vim.o.relativenumber = true
 
 -- Enable mouse mode, can be useful for resizing splits for example!
-vim.o.mouse = 'a'
+-- vim.o.mouse = 'a'
 
 -- Don't show the mode, since it's already in the status line
 vim.o.showmode = false
@@ -121,10 +121,10 @@ vim.schedule(function()
 end)
 
 -- Enable break indent
-vim.o.breakindent = true
+-- vim.o.breakindent = false
 
 -- Save undo history
-vim.o.undofile = true
+vim.o.undofile = false
 
 -- Case-insensitive searching UNLESS \C or one or more capital letters in the search term
 vim.o.ignorecase = true
@@ -184,7 +184,7 @@ vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagn
 --
 -- NOTE: This won't work in all terminal emulators/tmux/etc. Try your own mapping
 -- or just use <C-\><C-n> to exit terminal mode
-vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
+-- vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' })
 
 -- TIP: Disable arrow keys in normal mode
 -- vim.keymap.set('n', '<left>', '<cmd>echo "Use h to move!!"<CR>')
@@ -273,18 +273,18 @@ require('lazy').setup({
   -- options to `gitsigns.nvim`.
   --
   -- See `:help gitsigns` to understand what the configuration keys do
-  { -- Adds git related signs to the gutter, as well as utilities for managing changes
-    'lewis6991/gitsigns.nvim',
-    opts = {
-      signs = {
-        add = { text = '+' },
-        change = { text = '~' },
-        delete = { text = '_' },
-        topdelete = { text = '‾' },
-        changedelete = { text = '~' },
-      },
-    },
-  },
+  -- { -- Adds git related signs to the gutter, as well as utilities for managing changes
+  --   'lewis6991/gitsigns.nvim',
+  --   opts = {
+  --     signs = {
+  --       add = { text = '+' },
+  --       change = { text = '~' },
+  --       delete = { text = '_' },
+  --       topdelete = { text = '‾' },
+  --       changedelete = { text = '~' },
+  --     },
+  --   },
+  -- },
 
   -- NOTE: Plugins can also be configured to run Lua code when they are loaded.
   --
@@ -676,7 +676,7 @@ require('lazy').setup({
         -- clangd = {},
         -- gopls = {},
         -- pyright = {},
-        basedpyright = {},
+        ruff = {},
         -- rust_analyzer = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
         --
@@ -719,6 +719,9 @@ require('lazy').setup({
       local ensure_installed = vim.tbl_keys(servers or {})
       vim.list_extend(ensure_installed, {
         'stylua', -- Used to format Lua code
+        'isort',
+        'autopep8',
+        'debugpy',
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
@@ -755,24 +758,24 @@ require('lazy').setup({
     },
     opts = {
       notify_on_error = false,
-      format_on_save = function(bufnr)
-        -- Disable "format_on_save lsp_fallback" for languages that don't
-        -- have a well standardized coding style. You can add additional
-        -- languages here or re-enable it for the disabled ones.
-        local disable_filetypes = { c = true, cpp = true }
-        if disable_filetypes[vim.bo[bufnr].filetype] then
-          return nil
-        else
-          return {
-            timeout_ms = 500,
-            lsp_format = 'fallback',
-          }
-        end
-      end,
+      -- format_on_save = function(bufnr)
+      --   -- Disable "format_on_save lsp_fallback" for languages that don't
+      --   -- have a well standardized coding style. You can add additional
+      --   -- languages here or re-enable it for the disabled ones.
+      --   local disable_filetypes = { c = true, cpp = true }
+      --   if disable_filetypes[vim.bo[bufnr].filetype] then
+      --     return nil
+      --   else
+      --     return {
+      --       timeout_ms = 500,
+      --       lsp_format = 'fallback',
+      --     }
+      --   end
+      -- end,
       formatters_by_ft = {
         lua = { 'stylua' },
         -- Conform can also run multiple formatters sequentially
-        -- python = { "isort", "black" },
+        python = { 'isort', 'autopep8' },
         --
         -- You can use 'stop_after_first' to run the first available formatter from the list
         -- javascript = { "prettierd", "prettier", stop_after_first = true },
@@ -879,27 +882,56 @@ require('lazy').setup({
     },
   },
 
-  { -- You can easily change to a different colorscheme.
-    -- Change the name of the colorscheme plugin below, and then
-    -- change the command in the config to whatever the name of that colorscheme is.
-    --
-    -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
-    'folke/tokyonight.nvim',
-    priority = 1000, -- Make sure to load this before all the other start plugins.
+  {
+    'projekt0n/github-nvim-theme',
+    name = 'github-theme',
+    lazy = false, -- make sure we load this during startup if it is your main colorscheme
+    priority = 1000, -- make sure to load this before all the other start plugins
     config = function()
-      ---@diagnostic disable-next-line: missing-fields
-      require('tokyonight').setup {
-        styles = {
-          comments = { italic = false }, -- Disable italics in comments
-        },
+      require('github-theme').setup {
+        -- ...
       }
 
-      -- Load the colorscheme here.
-      -- Like many other themes, this one has different styles, and you could load
-      -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-      vim.cmd.colorscheme 'tokyonight-night'
+      vim.cmd 'colorscheme github_light'
+      --  Toggle colour schemes
+      -- Define the two schemes you want to toggle between
+      local scheme1 = 'github_light'
+      local scheme2 = 'github_dark'
+
+      -- Function to toggle the color scheme
+      function toggle_colorscheme()
+        if vim.g.colors_name == scheme1 then
+          vim.cmd('colorscheme ' .. scheme2)
+        else
+          vim.cmd('colorscheme ' .. scheme1)
+        end
+      end
+
+      -- Map a keyboard shortcut (e.g., <leader>tc in normal mode) to the function
+      vim.keymap.set('n', '<leader>tc', toggle_colorscheme, { desc = '[T]oggle [c]olor scheme' })
     end,
   },
+  -- { -- You can easily change to a different colorscheme.
+  --   -- Change the name of the colorscheme plugin below, and then
+  --   -- change the command in the config to whatever the name of that colorscheme is.
+  --   --
+  --   -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
+  --   'folke/tokyonight.nvim',
+  --   priority = 1000, -- Make sure to load this before all the other start plugins.
+  --   config = function()
+  --     ---@diagnostic disable-next-line: missing-fields
+  --     require('tokyonight').setup {
+  --       styles = {
+  --         comments = { italic = false }, -- Disable italics in comments
+  --       },
+  --     }
+
+  --     -- Load the colorscheme here.
+  --     -- Like many other themes, this one has different styles, and you could load
+  --     -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
+  --     vim.cmd.colorscheme 'tokyonight-night'
+  --   end,
+  -- },
 
   -- Highlight todo, notes, etc in comments
   { 'folke/todo-comments.nvim', event = 'VimEnter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false } },
@@ -920,7 +952,7 @@ require('lazy').setup({
       -- - saiw) - [S]urround [A]dd [I]nner [W]ord [)]Paren
       -- - sd'   - [S]urround [D]elete [']quotes
       -- - sr)'  - [S]urround [R]eplace [)] [']
-      require('mini.surround').setup()
+      -- require('mini.surround').setup()
 
       -- Simple and easy statusline.
       --  You could remove this setup call if you don't like it,
@@ -965,6 +997,73 @@ require('lazy').setup({
     --    - Incremental selection: Included, see `:help nvim-treesitter-incremental-selection-mod`
     --    - Show your current context: https://github.com/nvim-treesitter/nvim-treesitter-context
     --    - Treesitter + textobjects: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
+  },
+
+  {
+    'esmuellert/vscode-diff.nvim',
+    dependencies = { 'MunifTanjim/nui.nvim' },
+    cmd = 'CodeDiff',
+    config = function()
+      require('vscode-diff').setup {
+        -- Highlight configuration
+        highlights = {
+          -- Line-level: accepts highlight group names or hex colors (e.g., "#2ea043")
+          line_insert = 'DiffAdd', -- Line-level insertions
+          line_delete = 'DiffDelete', -- Line-level deletions
+
+          -- Character-level: accepts highlight group names or hex colors
+          -- If specified, these override char_brightness calculation
+          char_insert = nil, -- Character-level insertions (nil = auto-derive)
+          char_delete = nil, -- Character-level deletions (nil = auto-derive)
+
+          -- Brightness multiplier (only used when char_insert/char_delete are nil)
+          -- nil = auto-detect based on background (1.4 for dark, 0.92 for light)
+          char_brightness = nil, -- Auto-adjust based on your colorscheme
+        },
+
+        -- Diff view behavior
+        diff = {
+          disable_inlay_hints = true, -- Disable inlay hints in diff windows for cleaner view
+          max_computation_time_ms = 5000, -- Maximum time for diff computation (VSCode default)
+        },
+
+        -- Explorer panel configuration
+        explorer = {
+          position = 'right', -- "left" or "bottom"
+          width = 40, -- Width when position is "left" (columns)
+          height = 15, -- Height when position is "bottom" (lines)
+          indent_markers = true, -- Show indent markers in tree view (│, ├, └)
+          icons = {
+            folder_closed = '', -- Nerd Font folder icon (customize as needed)
+            folder_open = '', -- Nerd Font folder-open icon
+          },
+          view_mode = 'list', -- "list" or "tree"
+          file_filter = {
+            ignore = {}, -- Glob patterns to hide (e.g., {"*.lock", "dist/*"})
+          },
+        },
+
+        -- Keymaps in diff view
+        keymaps = {
+          view = {
+            quit = 'q', -- Close diff tab
+            toggle_explorer = '<leader>b', -- Toggle explorer visibility (explorer mode only)
+            next_hunk = ']c', -- Jump to next change
+            prev_hunk = '[c', -- Jump to previous change
+            next_file = ']f', -- Next file in explorer mode
+            prev_file = '[f', -- Previous file in explorer mode
+            diff_get = 'do', -- Get change from other buffer (like vimdiff)
+            diff_put = 'dp', -- Put change to other buffer (like vimdiff)
+          },
+          explorer = {
+            select = '<CR>', -- Open diff for selected file
+            hover = 'K', -- Show file diff preview
+            refresh = 'R', -- Refresh git status
+            toggle_view_mode = 'i', -- Toggle between 'list' and 'tree' views
+          },
+        },
+      }
+    end,
   },
 
   -- The following comments only work if you have downloaded the kickstart repo, not just copy pasted the
