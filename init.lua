@@ -675,8 +675,7 @@ require('lazy').setup({
       local servers = {
         -- clangd = {},
         -- gopls = {},
-        -- pyright = {},
-        ruff = {},
+        basedpyright = {},
         -- rust_analyzer = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
         --
@@ -979,7 +978,7 @@ require('lazy').setup({
     main = 'nvim-treesitter.config', -- Sets main module to use for opts
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
     opts = {
-      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' },
+      ensure_installed = { 'python', 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' },
       -- Autoinstall languages that are not installed
       auto_install = true,
       highlight = {
@@ -1063,6 +1062,82 @@ require('lazy').setup({
           },
         },
       }
+    end,
+  },
+  {
+    'kmontocam/nvim-conda',
+    dependencies = { 'nvim-lua/plenary.nvim' },
+  },
+  {
+    'mfussenegger/nvim-dap-python',
+    dependencies = {
+      'mfussenegger/nvim-dap',
+      'rcarriga/nvim-dap-ui',
+      'nvim-neotest/nvim-nio',
+    },
+    config = function()
+      local dap = require 'dap'
+      local dapui = require 'dapui'
+      dapui.setup()
+      require('dap-python').setup('debugpy-adapter')
+
+      dap.listeners.before.attach.dapui_config = function()
+        dapui.open()
+      end
+      dap.listeners.before.launch.dapui_config = function()
+        dapui.open()
+      end
+      dap.listeners.before.event_terminated.dapui_config = function()
+        dapui.close()
+      end
+      dap.listeners.before.event_exited.dapui_config = function()
+        dapui.close()
+      end
+      vim.keymap.set('n', '<F5>', function()
+        dap.continue()
+      end, { desc = 'Debug Continue' })
+      vim.keymap.set('n', '<F17>', function()
+        dap.terminate()
+      end, { desc = 'Debug Terminate' })
+      vim.keymap.set('n', '<F10>', function()
+        dap.step_over()
+      end, { desc = 'Debug Step Over' })
+      vim.keymap.set('n', '<F11>', function()
+        dap.step_into()
+      end, { desc = 'Debug Step Into' })
+      vim.keymap.set('n', '<F12>', function()
+        dap.step_out()
+      end, { desc = 'Debug Step Out' })
+      vim.keymap.set('n', '<Leader>b', function()
+        dap.toggle_breakpoint()
+      end, { desc = 'Toggle [b]reakpoint' })
+      vim.keymap.set('n', '<Leader>B', function()
+        dap.set_breakpoint()
+      end, { desc = 'Set [B]reakpoint' })
+      vim.keymap.set('n', '<Leader>lp', function()
+        dap.set_breakpoint(nil, nil, vim.fn.input 'Log point message: ')
+      end, { desc = 'Debug [l]og [p]oint message' })
+      vim.keymap.set('n', '<Leader>dr', function()
+        dap.repl.open()
+      end, { desc = 'Debug Open [r]epl' })
+      vim.keymap.set('n', '<Leader>dl', function()
+        dap.run_last()
+      end, { desc = 'Run [l]ast' })
+
+      vim.keymap.set({ 'n', 'v' }, '<Leader>dh', function()
+        require('dap.ui.widgets').hover()
+      end)
+      vim.keymap.set({ 'n', 'v' }, '<Leader>dp', function()
+        require('dap.ui.widgets').preview()
+      end)
+      vim.keymap.set('n', '<Leader>df', function()
+        local widgets = require 'dap.ui.widgets'
+        widgets.centered_float(widgets.frames)
+      end)
+      vim.keymap.set('n', '<Leader>ds', function()
+        local widgets = require 'dap.ui.widgets'
+        widgets.centered_float(widgets.scopes)
+      end)
     end,
   },
 
