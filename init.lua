@@ -800,6 +800,9 @@ require('lazy').setup({
           end
           return 'make install_jsregexp'
         end)(),
+        config = function()
+          require('luasnip.loaders.from_snipmate').lazy_load { paths = { vim.fn.stdpath 'config' .. '/snippets' } }
+        end,
         dependencies = {
           -- `friendly-snippets` contains a variety of premade snippets.
           --    See the README about individual language/framework/plugin snippets:
@@ -1079,7 +1082,7 @@ require('lazy').setup({
       local dap = require 'dap'
       local dapui = require 'dapui'
       dapui.setup()
-      require('dap-python').setup('debugpy-adapter')
+      require('dap-python').setup 'debugpy-adapter'
 
       dap.listeners.before.attach.dapui_config = function()
         dapui.open()

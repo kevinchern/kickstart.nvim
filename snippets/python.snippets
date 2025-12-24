@@ -1,0 +1,17 @@
+snippet raitodo
+    raise NotImplementedError("${1:TODO}")
+
+snippet ifmain
+    import aim
+    from structlog import getLogger
+    def main(*, title, args):
+        title = "[TODO]" + title
+        logger = getLogger(title)
+        run = aim.Run(experiment=title)
+        run["hparams"] = vars(args)
+    if __name__ == "__main__":
+        import argparse
+        parser = argparse.ArgumentParser()
+        parser.add_argument("--title", type=str, default="${1:UNTITLED}")
+        args_ = parser.parse_args()
+        main(**vars(args_), args=args_)
