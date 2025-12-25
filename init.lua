@@ -910,7 +910,7 @@ require('lazy').setup({
       -- Define the two schemes you want to toggle between
       local scheme1 = 'github_light'
       local scheme2 = 'github_dark'
-        -- -- default theme as a backup, `recall()` can return `nil`.
+      -- -- default theme as a backup, `recall()` can return `nil`.
       local theme = require('last-color').recall() or scheme1
       vim.cmd.colorscheme(theme)
 
@@ -1039,12 +1039,15 @@ require('lazy').setup({
       dap.listeners.before.attach.dapui_config = function()
         dapui.open()
       end
+
       dap.listeners.before.launch.dapui_config = function()
         dapui.open()
       end
+
       dap.listeners.before.event_terminated.dapui_config = function()
         dapui.close()
       end
+
       dap.listeners.before.event_exited.dapui_config = function()
         dapui.close()
       end
@@ -1073,36 +1076,26 @@ require('lazy').setup({
         dap.toggle_breakpoint()
       end, { desc = 'Toggle Breakpoint' })
 
+      vim.keymap.set('n', '<F21>', function()
+        dap.set_breakpoint(vim.fn.input 'Breakpoint condition: ')
+      end, { desc = 'Set conditional breakpoint' })
+
       vim.keymap.set('n', '<Leader>lp', function()
         dap.set_breakpoint(nil, nil, vim.fn.input 'Log point message: ')
       end, { desc = 'Debug [l]og [p]oint message' })
 
+      vim.keymap.set('n', '<Leader>dc', function()
+        dapui.float_element 'console'
+      end, { desc = '[D]ebug float [c]onsole' })
+
       vim.keymap.set('n', '<Leader>dr', function()
-        dap.repl.open()
-      end, { desc = 'Debug Open [r]epl' })
-
-      vim.keymap.set('n', '<Leader>dl', function()
-        dap.run_last()
-      end, { desc = 'Run [l]ast' })
-
-      vim.keymap.set({ 'n', 'v' }, '<Leader>dh', function()
-        require('dap.ui.widgets').hover()
-      end)
-
-      vim.keymap.set({ 'n', 'v' }, '<Leader>dp', function()
-        require('dap.ui.widgets').preview()
-      end)
-
-      vim.keymap.set('n', '<Leader>df', function()
-        local widgets = require 'dap.ui.widgets'
-        widgets.centered_float(widgets.frames)
-      end)
+        dapui.float_element 'repl'
+      end, { desc = '[D]ebug float [r]epl' })
 
       vim.keymap.set('n', '<Leader>ds', function()
         local widgets = require 'dap.ui.widgets'
         widgets.centered_float(widgets.scopes)
-      end)
-
+      end, { desc = '[D]ebug float [s]copes' })
     end,
   },
 
