@@ -1052,6 +1052,15 @@ require('lazy').setup({
         dapui.close()
       end
 
+      vim.api.nvim_create_autocmd({ 'BufEnter' }, {
+        group = vim.api.nvim_create_augroup('dapui_autoscroll', { clear = true }),
+        pattern = { '*[dap-terminal]' },
+        callback = function()
+          -- Go to normal mode and then jump to the end of the buffer
+          vim.cmd 'normal! G'
+        end,
+      })
+
       vim.keymap.set('n', '<F5>', function()
         dap.continue()
       end, { desc = 'Debug Continue' })
