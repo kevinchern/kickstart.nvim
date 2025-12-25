@@ -883,6 +883,18 @@ require('lazy').setup({
       signature = { enabled = true },
     },
   },
+  {
+    'raddari/last-color.nvim',
+    config = function()
+      require('last-color').setup {
+        -- Optional configuration settings (defaults shown)
+        event = 'BufWinEnter', -- Vim event to load the colorscheme
+        auto_save = true, -- Automatically save the colorscheme on :colorscheme
+        auto_load = true, -- Automatically load the colorscheme on startup
+        path = vim.fn.stdpath 'data' .. '/last_colorscheme', -- File path for saving
+      }
+    end,
+  },
 
   {
     'projekt0n/github-nvim-theme',
@@ -894,11 +906,13 @@ require('lazy').setup({
         -- ...
       }
 
-      vim.cmd 'colorscheme github_light'
       --  Toggle colour schemes
       -- Define the two schemes you want to toggle between
       local scheme1 = 'github_light'
       local scheme2 = 'github_dark'
+        -- -- default theme as a backup, `recall()` can return `nil`.
+      local theme = require('last-color').recall() or scheme1
+      vim.cmd.colorscheme(theme)
 
       -- Function to toggle the color scheme
       function toggle_colorscheme()
@@ -910,7 +924,7 @@ require('lazy').setup({
       end
 
       -- Map a keyboard shortcut (e.g., <leader>tc in normal mode) to the function
-      vim.keymap.set('n', '<leader>tc', toggle_colorscheme, { desc = '[T]oggle [c]olor scheme' })
+      vim.keymap.set('n', '<M-t>', toggle_colorscheme, { desc = '[T]oggle [c]olor scheme' })
     end,
   },
   -- { -- You can easily change to a different colorscheme.
@@ -1004,6 +1018,7 @@ require('lazy').setup({
   {
     'sindrets/diffview.nvim',
   },
+
   {
     'kmontocam/nvim-conda',
     dependencies = { 'nvim-lua/plenary.nvim' },
@@ -1037,30 +1052,35 @@ require('lazy').setup({
       vim.keymap.set('n', '<F5>', function()
         dap.continue()
       end, { desc = 'Debug Continue' })
+
       vim.keymap.set('n', '<F17>', function()
         dap.terminate()
       end, { desc = 'Debug Terminate' })
+
       vim.keymap.set('n', '<F10>', function()
         dap.step_over()
       end, { desc = 'Debug Step Over' })
+
       vim.keymap.set('n', '<F11>', function()
         dap.step_into()
       end, { desc = 'Debug Step Into' })
-      vim.keymap.set('n', '<F12>', function()
+
+      vim.keymap.set('n', '<F23>', function()
         dap.step_out()
       end, { desc = 'Debug Step Out' })
-      vim.keymap.set('n', '<Leader>b', function()
+
+      vim.keymap.set('n', '<F9>', function()
         dap.toggle_breakpoint()
-      end, { desc = 'Toggle [b]reakpoint' })
-      vim.keymap.set('n', '<Leader>B', function()
-        dap.set_breakpoint()
-      end, { desc = 'Set [B]reakpoint' })
+      end, { desc = 'Toggle Breakpoint' })
+
       vim.keymap.set('n', '<Leader>lp', function()
         dap.set_breakpoint(nil, nil, vim.fn.input 'Log point message: ')
       end, { desc = 'Debug [l]og [p]oint message' })
+
       vim.keymap.set('n', '<Leader>dr', function()
         dap.repl.open()
       end, { desc = 'Debug Open [r]epl' })
+
       vim.keymap.set('n', '<Leader>dl', function()
         dap.run_last()
       end, { desc = 'Run [l]ast' })
@@ -1068,17 +1088,21 @@ require('lazy').setup({
       vim.keymap.set({ 'n', 'v' }, '<Leader>dh', function()
         require('dap.ui.widgets').hover()
       end)
+
       vim.keymap.set({ 'n', 'v' }, '<Leader>dp', function()
         require('dap.ui.widgets').preview()
       end)
+
       vim.keymap.set('n', '<Leader>df', function()
         local widgets = require 'dap.ui.widgets'
         widgets.centered_float(widgets.frames)
       end)
+
       vim.keymap.set('n', '<Leader>ds', function()
         local widgets = require 'dap.ui.widgets'
         widgets.centered_float(widgets.scopes)
       end)
+
     end,
   },
 
@@ -1134,8 +1158,8 @@ require('lazy').setup({
 ---
 --- @return string[]|nil lines The selected text as an array of lines.
 function get_visual_selection_text()
-  local _, srow, scol = unpack(vim.fn.getpos('v'))
-  local _, erow, ecol = unpack(vim.fn.getpos('.'))
+  local _, srow, scol = unpack(vim.fn.getpos 'v')
+  local _, erow, ecol = unpack(vim.fn.getpos '.')
 
   -- visual line mode
   if vim.fn.mode() == 'V' then
@@ -1160,25 +1184,20 @@ function get_visual_selection_text()
     local lines = {}
     if srow > erow then
       srow, erow = erow, srow
-
     end
     if scol > ecol then
       scol, ecol = ecol, scol
     end
     for i = srow, erow do
-      table.insert(
-        lines,
-        vim.api.nvim_buf_get_text(0, i - 1, math.min(scol - 1, ecol), i - 1, math.max(scol - 1, ecol), {})[1]
-      )
+      table.insert(lines, vim.api.nvim_buf_get_text(0, i - 1, math.min(scol - 1, ecol), i - 1, math.max(scol - 1, ecol), {})[1])
     end
     return lines
   end
-
 end
 
-vim.keymap.set("v", "<leader>de", function()
-  require("dap").repl.execute(table.concat(get_visual_selection_text(), "\n"))
-end)
+vim.keymap.set('v', '<M-E>', function()
+  require('dap').repl.execute(table.concat(get_visual_selection_text(), '\n'))
+end, { desc = '[E]xecute code under visual selection' })
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
