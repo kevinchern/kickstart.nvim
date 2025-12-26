@@ -843,7 +843,8 @@ require('lazy').setup({
         -- <c-k>: Toggle signature help
         --
         -- See :h blink-cmp-config-keymap for defining your own keymap
-        preset = 'default',
+        preset = 'none',
+        ['<tab>'] = {'snippet_forward', 'accept', 'fallback'},
 
         -- For more advanced Luasnip keymaps (e.g. selecting choice nodes, expansion) see:
         --    https://github.com/L3MON4D3/LuaSnip?tab=readme-ov-file#keymaps
@@ -1054,7 +1055,7 @@ require('lazy').setup({
 
       vim.api.nvim_create_autocmd({ 'BufEnter' }, {
         group = vim.api.nvim_create_augroup('dapui_autoscroll', { clear = true }),
-        pattern = { '*[dap-terminal]' },
+        pattern = { '*dap-terminal*' },
         callback = function()
           -- Go to normal mode and then jump to the end of the buffer
           vim.cmd 'normal! G'
