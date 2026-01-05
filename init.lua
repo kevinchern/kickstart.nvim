@@ -779,6 +779,14 @@ require('lazy').setup({
         -- You can use 'stop_after_first' to run the first available formatter from the list
         -- javascript = { "prettierd", "prettier", stop_after_first = true },
       },
+      formatters = {
+        autopep8 = {
+          prepend_args = { '--max-line-length', '100' },
+        },
+        isort = {
+          prepend_args = { '--line-length', '100' },
+        },
+      },
     },
   },
 
@@ -844,7 +852,7 @@ require('lazy').setup({
         --
         -- See :h blink-cmp-config-keymap for defining your own keymap
         preset = 'none',
-        ['<tab>'] = {'snippet_forward', 'accept', 'fallback'},
+        ['<tab>'] = { 'snippet_forward', 'accept', 'fallback' },
 
         -- For more advanced Luasnip keymaps (e.g. selecting choice nodes, expansion) see:
         --    https://github.com/L3MON4D3/LuaSnip?tab=readme-ov-file#keymaps
